@@ -1,5 +1,5 @@
 #!/bin/bash
-TOKEN_BOT=$(sed -n "22s/.*TELEGRAM_TOKEN *= *['\"]\([^'\"]*\)['\"].*/\1/p" /root/bot.py) 
+TOKEN_BOT=$(awk -F'=' '/TELEGRAM_TOKEN/ {gsub(/[[:space:]]+/, "", $2); gsub(/["'"'"']/,"",$2); print $2; exit}' /root/bot.py) 
 CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-FT.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
