@@ -4,7 +4,7 @@ import datetime
 import time
 import subprocess
 import telegram
-from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, Bot
 from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters
 from CloudFlare import CloudFlare
 import random
@@ -15,11 +15,14 @@ from ip2geotools.databases.noncommercial import DbIpCity
 import json
 import base64
 import urllib.parse
+import re
+
 
 # Ganti dengan token bot Telegram dan Chat id Anda
 TELEGRAM_TOKEN = '7180943695:AAHdjI562H8aMRwhcbco9VJ5hzYRARcbzdM'
-#Tambahkan koma jika ingin menambahkan chat id lain,contoh [CHAT_ID, CHAT_ID2]
+#Tambahkan koma jika ingin menambahkan chat id lain,contoh [CHATID1, CHATID2]
 CHAT_ID = [5066246825, 5973850814, 5821080403, 5920844499]
+
 
 
 # Ganti dengan API Key Cloudflare Anda
@@ -42,6 +45,7 @@ ISATEDU2 = 'beta.zoom.us'
 TUTORHI = 'telegra.ph/CARA-IMPORT-KONFIG-HTTP-INJECTOR-03-07'
 TUTORHC = 'telegra.ph/CARA-IMPORT-KONFIG-HTTP-CUSTOM-03-07'
 TUTORVNG = 'telegra.ph/CARA-IMPORT-KONFIG-V2rayNG-03-07'
+TUTORCMFA = 'telegra.ph/CARA-IMPORT-KONFIG-CMFA-03-23'
 WAKTU = '1 Jam'
 PEMBATAS = '☉————————————————————————☉'
 SGTRIAL = 'sgtrial'
@@ -395,11 +399,19 @@ def wait_cname_domain(update, context):
 def wait_cname_subdomain(update, context):
     user_id = update.message.from_user.id
     user_data = user_ips[user_id]
-    user_data['cname_subdomain'] = update.message.text
-
+    
+    # Mengecek apakah pesan mengandung karakter '@'
+    if '@' in update.message.text:
+        # Jika ada, mengambil pesan setelah karakter '@'
+        user_data['cname_subdomain'] = update.message.text.split('@', 1)[1].strip()
+    else:
+        # Jika tidak ada, mengambil seluruh pesan
+        user_data['cname_subdomain'] = update.message.text.strip()
+        
     if 'domain' not in user_data:
         context.bot.send_message(chat_id=user_id, text="Terjadi kesalahan. Silakan coba lagi.")
-        return cancel(update, context)          
+        return cancel(update, context)
+
     reply_keyboard = [['/cancel']]
     markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
     context.bot.send_message(chat_id=user_id, text="Input subdomain server pribadi :", reply_markup=markup)    
@@ -606,7 +618,15 @@ def wait_domain_vless(update, context):
 def wait_subdomain_vless(update, context):
     user_id = update.message.from_user.id
     user_data = user_ips[user_id]
-    user_data['domain_vless'] = update.message.text
+    
+    # Mengecek apakah pesan mengandung karakter '@'
+    if '@' in update.message.text:
+        # Jika ada, mengambil pesan setelah karakter '@'
+        user_data['domain_vless'] = update.message.text.split('@', 1)[1].strip()
+    else:
+        # Jika tidak ada, mengambil seluruh pesan
+        user_data['domain_vless'] = update.message.text.strip()
+        
     if 'domain' not in user_data:
         context.bot.send_message(chat_id=user_id, text="Terjadi kesalahan. Silakan coba lagi.")
         return cancel(update, context)
@@ -706,10 +726,11 @@ def wait_exp_vless(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```vless://{UUID}@{BUGISATEDU}:80?path=%2Fvless-ws&security=none&encryption=none&host={ISATEDU2}.{user_data['domain_vless']}.{user_data['domain']}&type=ws&sni={ISATEDU2}.{user_data['domain_vless']}.{user_data['domain']}#{user_data['domain_vless']}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)
@@ -742,7 +763,15 @@ def wait_domain_trojan(update, context):
 def wait_subdomain_trojan(update, context):
     user_id = update.message.from_user.id
     user_data = user_ips[user_id]
-    user_data['domain_trojan'] = update.message.text
+    
+    # Mengecek apakah pesan mengandung karakter '@'
+    if '@' in update.message.text:
+        # Jika ada, mengambil pesan setelah karakter '@'
+        user_data['domain_trojan'] = update.message.text.split('@', 1)[1].strip()
+    else:
+        # Jika tidak ada, mengambil seluruh pesan
+        user_data['domain_trojan'] = update.message.text.strip()
+        
     if 'domain' not in user_data:
         context.bot.send_message(chat_id=user_id, text="Terjadi kesalahan. Silakan coba lagi.")
         return cancel(update, context)
@@ -840,10 +869,11 @@ def wait_exp_trojan(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```trojan://{UUID}@{BUGISATEDU}:443?path=%2Ftrojan-ws&security=tls&host={ISATEDU2}.{user_data['domain_trojan']}.{user_data['domain']}&type=ws&sni={ISATEDU2}.{user_data['domain_trojan']}.{user_data['domain']}#{user_data['domain_trojan']}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)
@@ -903,10 +933,11 @@ def wait_subdomain_vless_trial(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```vless://{UUID}@{BUGISATEDU}:80?path=%2Fvless-ws&security=none&encryption=none&host={ISATEDU2}.{user_data['domain_vless_trial']}.{user_data['domain']}&type=ws&sni={ISATEDU2}.{user_data['domain_vless_trial']}.{user_data['domain']}#{user_data['domain_vless_trial']}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)
@@ -965,10 +996,11 @@ def wait_subdomain_trojan_trial(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```trojan://{UUID}@{BUGISATEDU}:443?path=%2Ftrojan-ws&security=tls&host={ISATEDU2}.{user_data['domain_trojan_trial']}.{user_data['domain']}&type=ws&sni={ISATEDU2}.{user_data['domain_trojan_trial']}.{user_data['domain']}#{user_data['domain_trojan_trial']}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)
@@ -1142,7 +1174,15 @@ def wait_domain_vmess(update, context):
 def wait_subdomain_vmess(update, context):
     user_id = update.message.from_user.id
     user_data = user_ips[user_id]
-    user_data['domain_vmess'] = update.message.text
+    
+    # Mengecek apakah pesan mengandung karakter '@'
+    if '@' in update.message.text:
+        # Jika ada, mengambil pesan setelah karakter '@'
+        user_data['domain_vmess'] = update.message.text.split('@', 1)[1].strip()
+    else:
+        # Jika tidak ada, mengambil seluruh pesan
+        user_data['domain_vmess'] = update.message.text.strip()
+        
     if 'domain' not in user_data:
         context.bot.send_message(chat_id=user_id, text="Terjadi kesalahan. Silakan coba lagi.")
         return cancel(update, context)
@@ -1318,10 +1358,11 @@ def wait_exp_vmess(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```{message_text_isatedu}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)    
@@ -1456,10 +1497,11 @@ def wait_subdomain_vmess_trial(update, context):
     message += f"» *INDOSAT EDUKASI :*\n"
     message += f"```{message_text_isatedu}```\n"
     message += f"`{PEMBATAS}`\n"
-    message += f"» *CARA IMPORT KONFIG :* \n"
-    message += f"» *HTTP INJECTOR :* *{TUTORHI}*\n"
-    message += f"» *HTTP CUSTOM :* *{TUTORHC}*\n"
+    message += f"» *Cara Import Konfig :* \n"
+    message += f"» *Http Injector :* *{TUTORHI}*\n"
+    message += f"» *Http Custom :* *{TUTORHC}*\n"
     message += f"» *V2rayNG :* *{TUTORVNG}*\n"
+    message += f"» *Clash Meta For Android :* *{TUTORCMFA}*\n"
     message += f"`{PEMBATAS}`"
     context.bot.send_message(chat_id=user_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN, disable_web_page_preview=True)
     return cancel(update, context)
@@ -1873,7 +1915,63 @@ def wait_comment(update, context):
         context.bot.send_message(chat_id=user_id, text="Terjadi kesalahan saat memperbarui rekaman DNS. Silakan coba lagi.")
     del user_ips[user_id]
     return cancel(update, context)
-    
+
+
+
+def autodelete():
+    cf = CloudFlare(email=CLOUDFLARE_EMAIL, token=CLOUDFLARE_API_KEY)
+    bot = Bot(token=TELEGRAM_TOKEN)
+    zone_ids = [ZONEID1, ZONEID2, ZONEID3, ZONEID4]
+
+    try:
+        for zone_id in zone_ids:
+            records = cf.zones.dns_records.get(zone_id)
+            if records:
+                expiration_dict = {}
+                for record in records:
+                    if record['comment'] is not None:
+                        try:
+                            expiration_date = datetime.datetime.strptime(record['comment'], '%Y-%m-%d')
+                            if expiration_date.date() == datetime.datetime.today().date():
+                                if expiration_date in expiration_dict:
+                                    expiration_dict[expiration_date].append(record)
+                                else:
+                                    expiration_dict[expiration_date] = [record]
+                        except ValueError as e:
+                            print(f"Error parsing date for record {record['id']}: {e}")
+                    else:
+                        print(f"Comment is None for record {record['id']}")
+
+                for expiration_date, records_list in expiration_dict.items():
+                    for record in records_list:
+                        record_id = record['id']                    
+                        record_sub = record['name']
+                        record_name = re.match(r'^([^.]+)', f"{record_sub}").group(1)
+                        record_comment = record['comment']
+                        try:
+                            cf.zones.dns_records.delete(zone_id, record_id)
+                            print(f"Deleted record {record_id} successfully.")
+                            message = f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                            message += f"               *Expired Domain*\n"
+                            message += f"━━━━━━━━━━━━━━━━━━━━━━\n"
+                            message += f"`Buyer : `@{record_name}\n"
+                            message += f"`Name  : ``{record_name}`\n"
+                            message += f"`Sub   : ``{record_sub}`\n"                        
+                            message += f"`Date  : ``{record_comment}`\n"
+                            message += f"━━━━━━━━━━━━━━━━━━━━━━"
+                            if isinstance(CHAT_ID, list):
+                                for chat_id in CHAT_ID:
+                                       bot.send_message(chat_id=chat_id, text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+                            else:
+                                bot.send_message(chat_id=CHAT_ID, text=message, parse_mode=telegram.ParseMode.MARKDOWN)
+                        except Exception as e:
+                            print(f"Error deleting record {record_id}: {e}")
+            else:
+                print("No records found.")
+    except Exception as e:
+        print(f"Error retrieving DNS records: {e}")
+        
+
 
 def main():
     updater = Updater(TELEGRAM_TOKEN, use_context=True)
@@ -2029,6 +2127,7 @@ def main():
 
     delete_sgtrial_auto()
     delete_idtrial_auto() 
+    autodelete() 
     updater.start_polling()
     updater.idle()
               
