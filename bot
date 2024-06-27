@@ -11,7 +11,7 @@ case "$1" in
         systemctl restart bot.service
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "Usage: bot {start|stop|restart}"
         exit 1
         ;;
 esac
