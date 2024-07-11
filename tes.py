@@ -11,36 +11,22 @@ client = TelegramClient('tes', api_id, api_hash).start(bot_token=bot_token)
 
 @client.on(events.InlineQuery)
 async def inline_handler(event):
-    query = event.text
+    if event.text.strip() == 'start':
+        query = event.text
 
-    # Membuat hasil inline
-    results = [
-        InputBotInlineResult(
-            id='1',
-            type='document',
-            title='Result 1',
-            description='This is the first result for query: {}'.format(query),
-            document='https://example.com/document.pdf',
-            attributes=[
-                DocumentAttributeFilename('document.pdf')
-            ],
-            send_message=InputBotInlineMessageText(message='You selected result 1 for query: {}'.format(query))
-        ),
-        InputBotInlineResult(
-            id='2',
-            type='document',
-            title='Result 2',
-            description='This is the second result for query: {}'.format(query),
-            document='https://example.com/document2.pdf',
-            attributes=[
-                DocumentAttributeFilename('document2.pdf')
-            ],
-            send_message=InputBotInlineMessageText(message='You selected result 2 for query: {}'.format(query))
-        )
-    ]
+        # Membuat hasil inline
+        results = [
+            InputBotInlineResult(
+                id='1',
+                type='article',
+                title='Result 1',
+                description='This is the first result for query: {}'.format(query),
+                message=InputBotInlineMessageText(message='Halo! Anda memulai bot ini.')
+            )
+        ]
 
-    # Mengirim hasil inline
-    await event.answer(results, cache_time=1, switch_pm_text='Go to bot', switch_pm_parameter='start')
+        # Mengirim hasil inline
+        await event.answer(results, cache_time=1)
 
 print("Bot is running...")
 client.run_until_disconnected()
