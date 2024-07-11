@@ -1,41 +1,40 @@
-from telegram import InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import Updater, InlineQueryHandler, CommandHandler
-import logging
+from telethon import TelegramClient, events
+from telethon.tl.types import InputBotInlineResult, InputTextMessageContent
 
-# Setup logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+# API ID dan API Hash Anda dari Telegram
+api_id = '6'
+api_hash = 'eb06d4abfb49dc3eeb1aeb98ae0f581e'
+bot_token = '7097508990:AAEWQdanPLIBD0biXuJIG5x2PlvytV4e8IA'
 
-# Token bot Telegram Anda
-TOKEN = '7097508990:AAEWQdanPLIBD0biXuJIG5x2PlvytV4e8IA'
+# Membuat klien bot
+client = TelegramClient('tes', api_id, api_hash).start(bot_token=bot_token)
 
-def start(update, context):
-    update.message.reply_text('Bot inline telah diaktifkan!')
+@client.on(events.InlineQuery)
+async def inline_handler(event):
+    query = event.text
 
-def inlinequery(update, context):
-    query = update.inline_query.query
-    if not query:
-        return
+    # Membuat hasil inline
     results = [
-        InlineQueryResultArticle(
+        InputBotInlineResult(
             id='1',
-            title='Contoh Judul',
-            input_message_content=InputTextMessageContent('Ini adalah contoh pesan')
+            type='article',
+            title='Result 1',
+            description='This is the first result for query: {}'.format(query),
+            thumb_url='https://example.com/thumb1.jpg',
+            input_message_content=InputTextMessageContent('You selected result 1 for query: {}'.format(query))
+        ),
+        InputBotInlineResult(
+            id='2',
+            type='article',
+            title='Result 2',
+            description='This is the second result for query: {}'.format(query),
+            thumb_url='https://example.com/thumb2.jpg',
+            input_message_content=InputTextMessageContent('You selected result 2 for query: {}'.format(query))
         )
     ]
-    update.inline_query.answer(results)
 
-def main():
-    updater = Updater(TOKEN, use_context=True)
-    dp = updater.dispatcher
+    # Mengirim hasil inline
+    await event.answer(results, cache_time=1, switch_pm_text='Go to bot', switch_pm_parameter='start')
 
-    # Handlers
-    dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(InlineQueryHandler(inlinequery))
-
-    # Start the Bot
-    updater.start_polling()
-    updater.idle()
-
-if __name__ == '__main__':
-    main()
+print("Bot is running...")
+client.run_until_disconnected()
