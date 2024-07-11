@@ -1,5 +1,5 @@
 from telethon import TelegramClient, events
-from telethon.tl.types import InputBotInlineResult, InputTextMessageContent
+from telethon.tl.types import InputBotInlineResult, InputBotInlineMessageText, DocumentAttributeFilename
 
 # API ID dan API Hash Anda dari Telegram
 api_id = '6'
@@ -17,19 +17,25 @@ async def inline_handler(event):
     results = [
         InputBotInlineResult(
             id='1',
-            type='article',
+            type='document',
             title='Result 1',
             description='This is the first result for query: {}'.format(query),
-            thumb_url='https://example.com/thumb1.jpg',
-            input_message_content=InputTextMessageContent('You selected result 1 for query: {}'.format(query))
+            document='https://example.com/document.pdf',
+            attributes=[
+                DocumentAttributeFilename('document.pdf')
+            ],
+            message=InputBotInlineMessageText(message='You selected result 1 for query: {}'.format(query))
         ),
         InputBotInlineResult(
             id='2',
-            type='article',
+            type='document',
             title='Result 2',
             description='This is the second result for query: {}'.format(query),
-            thumb_url='https://example.com/thumb2.jpg',
-            input_message_content=InputTextMessageContent('You selected result 2 for query: {}'.format(query))
+            document='https://example.com/document2.pdf',
+            attributes=[
+                DocumentAttributeFilename('document2.pdf')
+            ],
+            message=InputBotInlineMessageText(message='You selected result 2 for query: {}'.format(query))
         )
     ]
 
