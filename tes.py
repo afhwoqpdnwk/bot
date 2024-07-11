@@ -24,7 +24,7 @@ async def inline_handler(event):
             attributes=[
                 DocumentAttributeFilename('document.pdf')
             ],
-            message=InputBotInlineMessageText(message='You selected result 1 for query: {}'.format(query))
+            send_message=InputBotInlineMessageText(message='You selected result 1 for query: {}'.format(query))
         ),
         InputBotInlineResult(
             id='2',
@@ -35,7 +35,7 @@ async def inline_handler(event):
             attributes=[
                 DocumentAttributeFilename('document2.pdf')
             ],
-            message=InputBotInlineMessageText(message='You selected result 2 for query: {}'.format(query))
+            send_message=InputBotInlineMessageText(message='You selected result 2 for query: {}'.format(query))
         )
     ]
 
