@@ -15,6 +15,9 @@ while read -r line; do
     fi
 done < bogel.txt > List-IP-BOGEL.txt
 CAPTION=$(date +"%Y-%m-%d %H:%M:%S")
+
+KEYBOARD='{"inline_keyboard":[[{"text":"Menu","callback_data":"cancel"}]]}'
+
 for CHAT_ID in ${CHAT_IDS//,/ }; do
-    echo "Sending document to chat ID: $CHAT_ID" RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" $API_URL) echo "Response: $RESPONSE"
+    echo "Sending document to chat ID: $CHAT_ID" RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" -F "reply_markup=$KEYBOARD" $API_URL) echo "Response: $RESPONSE"
 done
