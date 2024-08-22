@@ -19,11 +19,11 @@ formatted_uptime=""
 
 # Format tahun, bulan, hari, jam, menit, dan detik
 if [ "$years" -gt 0 ]; then
-  formatted_uptime="${years}y "
+  formatted_uptime="${years}y/"
 fi
 
 if [ "$months" -gt 0 ]; then
-  formatted_uptime="${formatted_uptime}${months}m "
+  formatted_uptime="${formatted_uptime}${months}m/"
 fi
 
 if [ "$remaining_days" -gt 0 ]; then
@@ -31,11 +31,11 @@ if [ "$remaining_days" -gt 0 ]; then
 fi
 
 if [ "$hours" -gt 0 ]; then
-  formatted_uptime="${formatted_uptime}${hours}h "
+  formatted_uptime="${formatted_uptime}${hours}h:"
 fi
 
 if [ "$minutes" -gt 0 ]; then
-  formatted_uptime="${formatted_uptime}${minutes}m "
+  formatted_uptime="${formatted_uptime}${minutes}m:"
 fi
 
 if [ "$seconds" -gt 0 ]; then
