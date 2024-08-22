@@ -96,7 +96,7 @@ function format() {
                 echo "━━━━━━━━━━━━━━━━━━━━━━━"
             fi
             if [ -n "$index" ]; then
-                echo "Id: $index"
+                echo "Id : <code>$index</code>"
             fi
             if [ -n "$phone" ]; then
                 echo "From: $phone"
@@ -311,19 +311,19 @@ total_time() {
     if [ $seconds -ge 31536000 ]; then
       years=$((seconds / 31536000))
       seconds=$((seconds % 31536000))
-      output+="${years}yr:"
+      output+="${years}y/"
     fi
 
     if [ $seconds -ge 2592000 ]; then
       months=$((seconds / 2592000))
       seconds=$((seconds % 2592000))
-      output+="${months}mon:"
+      output+="${months}m/"
     fi
 
     if [ $seconds -ge 86400 ]; then
       days=$((seconds / 86400))
       seconds=$((seconds % 86400))
-      output+="${days}day:"
+      output+="${days}d "
     fi
 
     if [ $seconds -ge 3600 ]; then
@@ -485,7 +485,7 @@ function info(){
  did=$(curl -s http://$ipmodem/dev_info.data -H "Host: $ipmodem" -H "Connection: keep-alive" -H "Accept: */*" -H "X-Requested-With: XMLHttpRequest" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36" -H "Referer: http://$ipmodem/html/home.html" -H "Accept-Encoding: gzib, deflate" -H "Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7" -H "Cookie: $sesi")
  uptime=$(echo $did|awk -F "<uptime>" '{print $2}'|awk -F "</uptime>" '{print $1}'|total_time)
  time=$(echo $did|awk -F "<device_time>" '{print $2}'|awk -F "</device_time>" '{print $1}')
- chiptemp=$(echo "$did" | tr -d '\n' | awk -F "<chiptemp>" '{print $2}' | awk -F "</chiptemp>" '{print substr($1, 1, 2) "." substr($1, 3, 1)}')
+ chiptemp=$(echo "$did" | awk -F'[<>]' '/<chiptemp>/{printf "%.1f°C\n", $3/10}')
  operator=$(echo $did|awk -F "<SIM_name>" '{print $2}'|awk -F "</SIM_name>" '{print $1}')
  ip=$(curl -s http://$ipmodem/api/device/information -H "Host: $ipmodem" -H "Connection: keep-alive" -H "Accept: */*" -H "X-Requested-With: XMLHttpRequest" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36" -H "Referer: http://$ipmodem/html/home.html" -H "Accept-Encoding: gzib, deflate" -H "Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7" -H "Cookie: $sesi")
  ipp=$(echo $ip|awk -F "<WanIPAddress>" '{print $2}'|awk -F "</WanIPAddress>" '{print $1}')
@@ -499,6 +499,8 @@ function info(){
  totcon=$(echo $td|awk -F "<TotalConnectTime>" '{print $2}'|awk -F "</TotalConnectTime>" '{print $1}'|total_time)
  sup=$(echo $td|awk -F "<CurrentUploadRate>" '{print $2}'|awk -F "</CurrentUploadRate>" '{print $1}'|speed_print)
  sdd=$(echo $td|awk -F "<CurrentDownloadRate>" '{print $2}'|awk -F "</CurrentDownloadRate>" '{print $1}'|speed_print)
+ cup=$(echo $td|awk -F "<CurrentUpload>" '{print $2}'|awk -F "</CurrentUpload>" '{print $1}'|human_print)
+ cdd=$(echo $td|awk -F "<CurrentDownload>" '{print $2}'|awk -F "</CurrentDownload>" '{print $1}'|human_print)
  tup=$(echo $td|awk -F "<TotalUpload>" '{print $2}'|awk -F "</TotalUpload>" '{print $1}'|human_print)
  tdd=$(echo $td|awk -F "<TotalDownload>" '{print $2}'|awk -F "</TotalDownload>" '{print $1}'|human_print)
  par=$(curl -s http://$ipmodem/add_param.data -H "Host: $ipmodem" -H "Connection: keep-alive" -H "Accept: */*" -H "X-Requested-With: XMLHttpRequest" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36" -H "Referer: http://$ipmodem/html/home.html" -H "Accept-Encoding: gzib, deflate" -H "Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7" -H "Cookie: $sesi")
@@ -527,33 +529,33 @@ function info(){
 function informasi(){
  info
  echo "╭───────────────────────────╮"
- echo "├ Operator  : $operator"
- echo "├ Device    : $tp"
- echo "├ Dev Time  : $time"
- echo "├ Uptime    : $uptime"
- echo "├ Temp      : $chiptemp°C"
- echo "├ Wan IP    : $ipp"
- echo "├ Wan Dur   : $curcon"
- echo "├ Total Dur : $totcon"
- echo "├ DNS 1     : $dns1"
- echo "├ DNS 2     : $dns2"
- echo "├ $(echo -ne "Network   : ";network $net)"
- echo "├ Speed UP  : $sup"
- echo "├ Speed DL  : $sdd"
- echo "├ Total UP  : $tup"
- echo "├ Total DL  : $tdd"
- echo "├ $(echo -ne "Band      : ";bands $band;) $(echo -ne "("B$band")")"
- echo "├ Bandwidth : $bandwidth"
- echo "├ PCI       : $pci"
- echo "├ Cell ID   : $cellid"
- echo "├ DL Freq   : $dlfreq MHz"
- echo "├ UP Freq   : $upfreq MHz"
- echo "├ EARFCN    : $earfcn" 
- echo "├ Rsrp      : $rsrp"
- echo "├ Rssi      : $rssi"
- echo "├ Rsrq      : $rsrq"
- echo "├ Sinr      : $sinr"
- echo "├ WatchCat  : $wctstats"
+ echo "├<code>Operator      :</code> $operator"
+ echo "├<code>Device        :</code> $tp"
+ echo "├<code>Dev Time      :</code> $time"
+ echo "├<code>Uptime        :</code> $uptime"
+ echo "├<code>Temp          :</code> $chiptemp"
+ echo "├<code>Wan IP        :</code> $ipp"
+ echo "├<code>Wan Dur       :</code> $curcon"
+ echo "├<code>Total Dur     :</code> $totcon"
+ echo "├<code>DNS 1         :</code> $dns1"
+ echo "├<code>DNS 2         :</code> $dns2"
+ echo "├<code>$(echo -ne "Network       :</code> ";network $net)"
+ echo "├<code>Speed UP      :</code> $sup"
+ echo "├<code>Speed DL      :</code> $sdd"
+ echo "├<code>Total UP      :</code> $tup"
+ echo "├<code>Total DL      :</code> $tdd"
+ echo "├<code>$(echo -ne "Band          :</code> ";bands $band;) $(echo -ne "("B$band")")"
+ echo "├<code>Bandwidth     :</code> $bandwidth"
+ echo "├<code>PCI           :</code> $pci"
+ echo "├<code>Cell ID       :</code> $cellid"
+ echo "├<code>DL Freq       :</code> $dlfreq MHz"
+ echo "├<code>UP Freq       :</code> $upfreq MHz"
+ echo "├<code>EARFCN        :</code> $earfcn" 
+ echo "├<code>Rsrp          :</code> $rsrp"
+ echo "├<code>Rssi          :</code> $rssi"
+ echo "├<code>Rsrq          :</code> $rsrq"
+ echo "├<code>Sinr          :</code> $sinr"
+ echo "├<code>WatchCat      :</code> $wctstats"
  echo "╰───────────────────────────╯"
 }
 
