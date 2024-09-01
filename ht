@@ -1,11 +1,8 @@
 #!/bin/bash
 
-#do not modify this file if you do not understand it
-#create https://github.com/ahmadqsyaa
-
 ipmodem="192.168.8.1"
 pass="admin"
-
+iface="eth1"
 
 login(){
 data=$(curl -s http://$ipmodem/api/webserver/SesTokInfo -H "Host: $ipmodem" -H "Connection: keep-alive" -H "Accept: */*" -H "X-Requested-With: XMLHttpRequest" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36" -H "Referer: http://$ipmodem/html/home.html" -H "Accept-Encoding: gzib, deflate" -H "Accept-Language: id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7")
@@ -73,10 +70,11 @@ function reboot() {
 # function for get sms
 function format() {
     if [ ! -n "$countsms" ]; then
-        echo -e "No SMS found on modem"
+        echo -e "sms modem is empty"
     else
         if [ "$1" = "1" ]; then 
-            echo -e "Read in $countsms SMS"
+            echo -e "                  Read $countsms SMS"
+
         else
             echo -e "                  Found $countsms SMS"
         fi
@@ -99,13 +97,13 @@ function format() {
                 echo "Id : <code>$index</code>"
             fi
             if [ -n "$phone" ]; then
-                echo "From: $phone"
+                echo "From : $phone"
             fi
             if [ -n "$content" ]; then
-                echo "Msg: $content"
+                echo "Msg : $content"
             fi
             if [ -n "$date" ]; then
-                echo "Date: $date"
+                echo "Date : $date"
             fi
         done <<< "$messages"
     fi
@@ -311,13 +309,13 @@ total_time() {
     if [ $seconds -ge 31536000 ]; then
       years=$((seconds / 31536000))
       seconds=$((seconds % 31536000))
-      output+="${years}y/"
+      output+="${years}y-"
     fi
 
     if [ $seconds -ge 2592000 ]; then
       months=$((seconds / 2592000))
       seconds=$((seconds % 2592000))
-      output+="${months}m/"
+      output+="${months}m-"
     fi
 
     if [ $seconds -ge 86400 ]; then
@@ -524,6 +522,9 @@ function info(){
  else
     wctstats=$(echo -e "OFF" "|" $wcthost)
  fi
+ RX=$(ifconfig $iface | awk -F[\(\)] '/bytes/ {printf "%s",$2}')
+ TX=$(ifconfig $iface | awk -F[\(\)] '/bytes/ {printf "%s",$4}')
+
 }
 
 function informasi(){
@@ -534,16 +535,17 @@ function informasi(){
  echo "├<code>Dev Time      :</code> $time"
  echo "├<code>Uptime        :</code> $uptime"
  echo "├<code>Temp          :</code> $chiptemp"
- echo "├<code>Wan IP        :</code> $ipp"
- echo "├<code>Wan Dur       :</code> $curcon"
- echo "├<code>Total Dur     :</code> $totcon"
+ echo "├<code>Wan Ip        :</code> $ipp"
+ echo "├<code>Wan Time      :</code> $curcon"
+ echo "├<code>Total Time    :</code> $totcon"
  echo "├<code>DNS 1         :</code> $dns1"
  echo "├<code>DNS 2         :</code> $dns2"
  echo "├<code>$(echo -ne "Network       :</code> ";network $net)"
- echo "├<code>Speed UP      :</code> $sup"
  echo "├<code>Speed DL      :</code> $sdd"
- echo "├<code>Total UP      :</code> $tup"
- echo "├<code>Total DL      :</code> $tdd"
+ echo "├<code>Speed UP      :</code> $sup"
+ echo "├<code>Current DL/UP :</code> $cdd / $cup"  
+ echo "├<code>Total DL/UP   :</code> $tdd / $tup"  
+ echo "├<code>Iface DL/UP   :</code> $RX / $TX"
  echo "├<code>$(echo -ne "Band          :</code> ";bands $band;) $(echo -ne "("B$band")")"
  echo "├<code>Bandwidth     :</code> $bandwidth"
  echo "├<code>PCI           :</code> $pci"
