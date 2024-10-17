@@ -5,7 +5,7 @@ CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-BOGEL.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT"
 
-MESSAGE_ID_FILE="/root/previous_message_ids.txt" # File untuk menyimpan message_id
+MESSAGE_ID_FILE="/root/bogel_message_ids.txt" # File untuk menyimpan message_id
 
 rm bogel.txt
 wget -O bogel.txt https://raw.githubusercontent.com/wggly/izin/main/ipvps
