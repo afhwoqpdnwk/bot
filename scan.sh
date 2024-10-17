@@ -3,6 +3,7 @@ TOKEN_BOT=$(awk -F'=' '/TELEGRAM_TOKEN/ {gsub(/[[:space:]]+/, "", $2); gsub(/["'
 CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-FT.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
+MESSAGE_ID_FILE="/root/ft_message_ids.txt"
 rm ip.txt
 wget -O ip.txt https://ip.yha.my.id/ip
 while read -r line; do
@@ -17,7 +18,45 @@ CAPTION=$(date +"%Y-%m-%d %H:%M:%S")
 
 KEYBOARD='{"inline_keyboard":[[{"text":"Menu","callback_data":"cancel"}]]}'
 
+delete_previous_message() {
+    local chat_id=$1
+    local message_id=$2
+    if [[ -n "$message_id" ]]; then
+        curl -s "$API_URL/deleteMessage" -d "chat_id=$chat_id" -d "message_id=$message_id" > /dev/null
+        echo "Deleted previous message: $message_id from chat ID: $chat_id"
+    fi
+}
+
+# Baca message_id dari file jika ada
+declare -A previous_message_ids
+if [[ -f $MESSAGE_ID_FILE ]]; then
+    while IFS=":" read -r chat_id message_id; do
+        previous_message_ids["$chat_id"]="$message_id"
+    done < "$MESSAGE_ID_FILE"
+fi
+
+# Kirim dokumen dan simpan message_id yang baru
 for CHAT_ID in ${CHAT_IDS//,/ }; do
-    echo "Sending document to chat ID: $CHAT_ID" RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" -F "reply_markup=$KEYBOARD" $API_URL) echo "Response: $RESPONSE"
+    # Hapus pesan sebelumnya
+    delete_previous_message "$CHAT_ID" "${previous_message_ids[$CHAT_ID]}"
+    
+    echo "Sending document to chat ID: $CHAT_ID"
+    RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" -F "reply_markup=$KEYBOARD" "$API_URL/sendDocument")
+
+    # Ambil message_id dari respons
+    MESSAGE_ID=$(echo "$RESPONSE" | jq -r '.result.message_id')
+
+    if [[ -n "$MESSAGE_ID" ]]; then
+        echo "Message sent successfully. Message ID: $MESSAGE_ID"
+        # Simpan message_id baru ke file
+        previous_message_ids["$CHAT_ID"]="$MESSAGE_ID"
+    else
+        echo "Failed to send message to chat ID: $CHAT_ID. Response: $RESPONSE"
+    fi
 done
 
+# Simpan message_id baru ke file
+> "$MESSAGE_ID_FILE" # Hapus konten lama
+for CHAT_ID in "${!previous_message_ids[@]}"; do
+    echo "$CHAT_ID:${previous_message_ids[$CHAT_ID]}" >> "$MESSAGE_ID_FILE"
+done
