@@ -6,7 +6,6 @@ FILE_PATH="/root/List-IP-ALL.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
 rm all.txt
 wget -O all.txt arisctunnel.xyz/ip-script
-wget -O - https://raw.githubusercontent.com/takbebeh/Registrasi/main/ipvip >> all.txt
 wget -O - https://raw.githubusercontent.com/wggly/izin/main/ipvps >> all.txt
 wget -O - https://raw.githubusercontent.com/Tomketstore/izin/main/ip >> all.txt
 wget -O - https://raw.githubusercontent.com/bmayu1/izin/main/ip >> all.txt
