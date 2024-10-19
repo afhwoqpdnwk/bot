@@ -5,19 +5,34 @@ FILE_PATH="/root/List-IP-FT.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
 rm ip.txt
 wget -O ip.txt https://ip.yha.my.id/ip
+
 while read -r line; do
     url=$(echo "$line" | awk '{print $4}')
     exp=$(echo "$line" | awk '{print $3}')
     if curl -s -m 1 -I "$url" | grep -q "Switching Protocol"; then
-        info=$(curl -s "http://ip-api.com/json/$url" | jq -r '"\(.isp) | \(.city) | \(.country)"')
-        printf "%-15s | %s | %s\n" "$url" "$info" "$exp"
+        # Dapatkan data ISP, City, dan Country
+        info=$(curl -s "http://ip-api.com/json/$url")
+        isp=$(echo "$info" | jq -r '.isp')
+        city=$(echo "$info" | jq -r '.city')
+        country=$(echo "$info" | jq -r '.country')
+
+        # Tentukan apakah city dan country sama atau berbeda
+        if [ "$city" == "$country" ]; then
+            location="$city"
+        else
+            location="$city/$country"
+        fi
+
+        printf "%-15s | %s | %s | %s\n" "$url" "$isp" "$location" "$exp"
     fi
 done < ip.txt > List-IP-FT.txt
+
 CAPTION=$(date +"%Y-%m-%d %H:%M:%S")
 
 KEYBOARD='{"inline_keyboard":[[{"text":"Menu","callback_data":"cancel"}]]}'
 
 for CHAT_ID in ${CHAT_IDS//,/ }; do
-    echo "Sending document to chat ID: $CHAT_ID" RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" -F "reply_markup=$KEYBOARD" $API_URL) echo "Response: $RESPONSE"
+    echo "Sending document to chat ID: $CHAT_ID" 
+    RESPONSE=$(curl -s -F "chat_id=$CHAT_ID" -F "document=@$FILE_PATH" -F "caption=$CAPTION" -F "reply_markup=$KEYBOARD" $API_URL) 
+    echo "Response: $RESPONSE"
 done
-
