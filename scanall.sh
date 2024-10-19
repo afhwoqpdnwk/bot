@@ -20,34 +20,22 @@ wget -O - https://raw.githubusercontent.com/Tomketstore/izin/main/ip >> all.txt
 wget -O - https://raw.githubusercontent.com/bmayu1/izin/main/ip >> all.txt
 wget -O - https://raw.githubusercontent.com/BmyVpn/bumiayuvpn/main/izin >> all.txt
 
-# Debugging: Cek isi all.txt
-echo "Isi file all.txt:"
-cat all.txt
-
 # Memproses setiap baris di all.txt
 while read -r line; do
     # Mendapatkan URL dan tanggal kadaluarsa dari kolom yang tepat
     url=$(echo "$line" | awk '{print $4}')
     exp=$(echo "$line" | awk '{print $3}')
     
-    # Debugging: Cetak URL dan exp
-    echo "Processing URL: $url with expiration date: $exp"
-    
-    # Mengecek apakah URL valid
+    # Mengecek apakah URL valid dan melakukan Switching Protocols
     if curl -s -m 1 -I "$url" | grep -q "Switching Protocols"; then
         # Mengambil informasi ISP, kota, dan negara dari API
         info=$(curl -s "http://ip-api.com/json/$url" | jq -r '"\(.isp) | \(.city) | \(.country)"')
         # Menulis hasil ke file List-IP-ALL.txt
         printf "%-15s | %s | %s\n" "$url" "$info" "$exp" >> List-IP-ALL.txt
-    else
-        # Jika URL tidak valid, simpan dalam log
-        echo "Invalid URL: $url" >> error.log
+        # Tampilkan URL yang berhasil
+        echo "Success: $url with expiration date: $exp"
     fi
 done < all.txt
-
-# Debugging: Cek isi file output
-echo "Isi file List-IP-ALL.txt:"
-cat List-IP-ALL.txt
 
 # Mendapatkan tanggal dan waktu saat ini
 CAPTION=$(date +"%Y-%m-%d %H:%M:%S")
