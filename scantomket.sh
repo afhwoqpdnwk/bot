@@ -5,7 +5,7 @@ CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-TOMKET.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
 rm tomket.txt
-wget -O bogel.txt https://raw.githubusercontent.com/Tomketstore/izin/main/ip
+wget -O tomket.txt https://raw.githubusercontent.com/Tomketstore/izin/main/ip
 while read -r line; do
     url=$(echo "$line" | awk '{print $4}')
     exp=$(echo "$line" | awk '{print $3}')
