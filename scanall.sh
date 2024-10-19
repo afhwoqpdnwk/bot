@@ -4,6 +4,8 @@ CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-ALL.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
 rm all.txt
+
+# Mengunduh data dari beberapa sumber
 wget -O all.txt arisctunnel.xyz/ip-script
 wget -O - https://raw.githubusercontent.com/wggly/izin/main/ipvps >> all.txt
 wget -O - https://raw.githubusercontent.com/Tomketstore/izin/main/ip >> all.txt
@@ -15,8 +17,20 @@ while read -r line; do
     exp=$(echo "$line" | awk '{print $3}')
     
     if curl -s -m 1 -I "$url" | grep -q "Switching Protocols"; then
-        info=$(curl -s "http://ip-api.com/json/$url" | jq -r '"\(.isp) | \(.city) | \(.country)"')
-        printf "%-15s | %s | %s\n" "$url" "$info" "$exp" >> List-IP-ALL.txt
+        # Dapatkan data ISP, City, dan Country
+        info=$(curl -s "http://ip-api.com/json/$url")
+        isp=$(echo "$info" | jq -r '.isp')
+        city=$(echo "$info" | jq -r '.city')
+        country=$(echo "$info" | jq -r '.country')
+
+        # Tentukan apakah city dan country sama atau berbeda
+        if [ "$city" == "$country" ]; then
+            location="$city"
+        else
+            location="$city/$country"
+        fi
+
+        printf "%-15s | %s | %s | %s\n" "$url" "$isp" "$location" "$exp" >> List-IP-ALL.txt
         echo "Success: $url with expiration date: $exp"
     fi
 done < all.txt
