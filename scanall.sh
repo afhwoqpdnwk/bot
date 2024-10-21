@@ -4,6 +4,7 @@ CHAT_IDS=$(awk -F'[][]' '/CHAT_ID/{print $2}' /root/bot.py)
 FILE_PATH="/root/List-IP-ALL.txt"
 API_URL="https://api.telegram.org/bot$TOKEN_BOT/sendDocument" 
 rm all.txt
+rm /root/List-IP-ALL.txt
 
 # Mengunduh data dari beberapa sumber
 wget -O all.txt arisctunnel.xyz/ip-script
